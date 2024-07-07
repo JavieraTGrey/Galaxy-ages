@@ -1,38 +1,41 @@
-from astropy.constants import k_B
 import numpy as np
-
+from astropy.constants import sigma_sb, L_sun, M_sun, R_sun
+import astropy.units as u
 
 class STAR:
     def __init__(self, mass):
-        self.mass = mass
+        self.mass = mass*M_sun
         self.properties()
 
     def properties(self):
 
         # Using Mass-Luminosity relation
-        if self.mass < 0.43:
-            self.luminosity = 0.23 * (self.mass ** 2.3)
-        elif 0.43 <= self.mass < 2.0:
-            self.luminosity = self.mass ** 4.0
-        elif 2.0 <= self.mass < 55:
-            self.luminosity = 1.4 * (self.mass ** 3.5)
-        elif 55 <= self.mass:
-            self.luminosity = 32000 * self.mass
+        if self.mass/M_sun < 0.43:
+            self.luminosity = 0.23 * ((self.mass/M_sun) ** 2.3)* L_sun
+        elif 0.43 <= self.mass/M_sun < 2.0:
+            self.luminosity = ((self.mass/M_sun) ** 4.0) * L_sun
+        elif 2.0 <= self.mass/M_sun < 55:
+            self.luminosity = 1.4 * L_sun * ((self.mass/M_sun) ** 3.5)
+        elif 55 <= self.mass/M_sun:
+            self.luminosity = 32000 * (self.mass/M_sun) * L_sun
 
         # Using stafan-boltzmann law
-        self.temperature = (self.luminosity / 4 * np.pi * k_B) ** 0.25
-
-        if self.temperature >= 33000:
+        sigma = sigma_sb.to(u.W / (u.m**2 * u.K**4))
+        self.radii = R_sun * (self.mass /M_sun)**0.8
+        denominator = (4 * np.pi * (self.radii**2) * sigma)
+        self.temperature = ((self.luminosity / denominator) ** 0.25)
+        
+        if self.temperature.value >= 33000:
             self.spectral_type = 'O'
-        elif self.temperature >= 10000:
+        elif self.temperature.value>= 10000:
             self.spectral_type = 'B'
-        elif self.temperature >= 7300:
+        elif self.temperature.value >= 7300:
             self.spectral_type = 'A'
-        elif self.temperature >= 6000:
+        elif self.temperature.value >= 6000:
             self.spectral_type = 'F'
-        elif self.temperature >= 5300:
+        elif self.temperature.value >= 5300:
             self.spectral_type = 'G'
-        elif self.temperature >= 3900:
+        elif self.temperature.value >= 3900:
             self.spectral_type = 'K'
         else:
             self.spectral_type = 'M'
