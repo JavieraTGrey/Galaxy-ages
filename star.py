@@ -19,21 +19,20 @@ class STAR:
         elif 55 <= self.mass:
             self.luminosity = 32000 * self.mass
 
-
-        # Using stefan-boltzmann law
+        # Using stafan-boltzmann law
         self.temperature = (self.luminosity / 4 * np.pi * k_B) ** 0.25
 
-        if self.temperature > 30000:
+        if self.temperature >= 33000:
             self.spectral_type = 'O'
-        elif self.temperature > 10000:
+        elif self.temperature >= 10000:
             self.spectral_type = 'B'
-        elif self.temperature > 7500:
+        elif self.temperature >= 7300:
             self.spectral_type = 'A'
-        elif self.temperature > 6000:
+        elif self.temperature >= 6000:
             self.spectral_type = 'F'
-        elif self.temperature > 5200:
+        elif self.temperature >= 5300:
             self.spectral_type = 'G'
-        elif self.temperature > 3700:
+        elif self.temperature >= 3900:
             self.spectral_type = 'K'
         else:
             self.spectral_type = 'M'
