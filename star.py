@@ -40,3 +40,17 @@ class STAR:
             self.spectral_type = 'K'
         else:
             self.spectral_type = 'M'
+
+    def update(self, t):
+        cons = (10 * u.Gyr)*(M_sun**3)
+        self.t_ms = cons / (self.mass**3)
+
+        life = t - self.stage
+
+        if (self.mass/M_sun) < 5:
+            if life > self.t_ms:
+                if self.branch == 'MS':
+                    pass
+        else:
+            if life > self.t_ms:
+                self.branch = "Dead"
