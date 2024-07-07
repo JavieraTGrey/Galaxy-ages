@@ -2,6 +2,7 @@ import numpy as np
 from astropy.constants import sigma_sb, L_sun, M_sun, R_sun
 import astropy.units as u
 
+
 class STAR:
     def __init__(self, mass):
         self.mass = mass*M_sun
@@ -21,13 +22,13 @@ class STAR:
 
         # Using stafan-boltzmann law
         sigma = sigma_sb.to(u.W / (u.m**2 * u.K**4))
-        self.radii = R_sun * (self.mass /M_sun)**0.8
+        self.radii = R_sun * (self.mass / M_sun)**0.8
         denominator = (4 * np.pi * (self.radii**2) * sigma)
         self.temperature = ((self.luminosity / denominator) ** 0.25)
-        
+
         if self.temperature.value >= 33000:
             self.spectral_type = 'O'
-        elif self.temperature.value>= 10000:
+        elif self.temperature.value >= 10000:
             self.spectral_type = 'B'
         elif self.temperature.value >= 7300:
             self.spectral_type = 'A'
