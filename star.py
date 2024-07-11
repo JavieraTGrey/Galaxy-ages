@@ -79,6 +79,17 @@ class STAR:
         else:
             raise ValueError(f"Spectral type {new_spectral_type} not available in spectra.")
 
+    def plot(self):
+        plt.figure(figsize=(10, 5))
+        plt.plot(self.wavelength,
+                    self.flux,
+                    color='mediumslateblue')
+        plt.xlabel('Wavelength (Å)')
+        plt.ylabel('Normalized Flux (ergs^-1Å^-1)') # ergs−1A−1
+        plt.title(f'Normalized Spectral Data - Type {self.spectral_type}')
+        plt.ticklabel_format(axis='y', style='sci', scilimits=(0, 0))
+        plt.show()
+
     def update(self, t):
         # T es edad del universo!
         cons = (10 * u.Gyr)*(M_sun**3)
