@@ -92,15 +92,26 @@ class STAR:
 
     def update(self, t):
         # T es edad del universo!
-        cons = (10 * u.Gyr)*(M_sun**3)
-        self.t_ms = cons / (self.mass**3)
 
-        life = t - self.stage
+        life = t - self.born
+        HB_life = 1 *u.Gyr + 1*u.Myr
 
-        if (self.mass/M_sun) < 5:
+        if life.value < 0:
+            self.branch = 'Unborn Star'
+
+        elif (self.mass/M_sun) < 5:
             if life > self.t_ms:
-                if self.branch == 'MS':
-                    self.branch == 'RG'
+                if life - self.t_ms < 1 * u.Gyr:
+                    if self.branch == 'MS':
+                        self.branch = 'RG'
+
+                elif life - self.t_ms < HB_life:
+                    self.branch = 'HB'
+            
+                else:
+                    self.branch = 'Dead'
+                    self.spectrum = np.zeros(self.spectrum.shape)
         else:
             if life > self.t_ms:
                 self.branch = "Dead"
+                self.spectrum = np.zeros(self.spectrum.shape)  
