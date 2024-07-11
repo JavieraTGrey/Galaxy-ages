@@ -4,15 +4,20 @@ import astropy.units as u
 
 
 class STAR:
-    def __init__(self, mass):
+
+    def __init__(self, mass, born):
+
         self.mass = mass*M_sun
+        self.born = born * u.Gyr
+        self.stage = self.born
+        self.branch = 'MS'
         self.properties()
 
     def properties(self):
 
         # Using Mass-Luminosity relation
         if self.mass/M_sun < 0.43:
-            self.luminosity = 0.23 * ((self.mass/M_sun) ** 2.3)* L_sun
+            self.luminosity = 0.23 * ((self.mass/M_sun) ** 2.3) * L_sun
         elif 0.43 <= self.mass/M_sun < 2.0:
             self.luminosity = ((self.mass/M_sun) ** 4.0) * L_sun
         elif 2.0 <= self.mass/M_sun < 55:
@@ -25,7 +30,7 @@ class STAR:
         self.radii = R_sun * (self.mass / M_sun)**0.8
         denominator = (4 * np.pi * (self.radii**2) * sigma)
         self.temperature = ((self.luminosity / denominator) ** 0.25)
-
+        
         if self.temperature.value >= 33000:
             self.spectral_type = 'O'
         elif self.temperature.value >= 10000:
@@ -42,6 +47,7 @@ class STAR:
             self.spectral_type = 'M'
 
     def update(self, t):
+        # T es edad del universo!
         cons = (10 * u.Gyr)*(M_sun**3)
         self.t_ms = cons / (self.mass**3)
 
@@ -50,7 +56,7 @@ class STAR:
         if (self.mass/M_sun) < 5:
             if life > self.t_ms:
                 if self.branch == 'MS':
-                    pass
+                    self.branch == 'RG'
         else:
             if life > self.t_ms:
                 self.branch = "Dead"
