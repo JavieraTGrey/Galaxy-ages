@@ -7,19 +7,25 @@ import numpy as np
 
 class STAR:
 
-    def __init__(self, mass, born, spectra):
+    def __init__(self, mass, born):
+
+        global spectra
+        global spectra_branch
 
         self.spectra = spectra
+        self.spectra_branch = spectra_branch
+
         self.mass = mass*M_sun
+
+        cons = (10 * u.Gyr) * M_sun**3
+        self.t_ms = cons / ((self.mass)**3)
+
         self.born = born * u.Gyr
         self.stage = self.born
         self.branch = 'MS'
         self.properties()
-        self.get_star_spectrum()
+        self.get_star_spectrum(self.spectra)
 
-        self.wavelength = self.wavelengths[self.wavelengths < 10000]
-        self.spectrum = self.spectrum[self.wavelengths < 10000]
-        self.flux = self.flux[self.wavelengths < 10000]
 
     def properties(self):
 
@@ -64,17 +70,22 @@ class STAR:
                                     header['CDELT1'])
             return wavelengths[:len(spectrum_data)], spectrum_data
 
-    def get_star_spectrum(self):
-        new_type = [type for type in list(self.spectra) if type.startswith(self.spectral_type)]
+    def get_star_spectrum(self, spectra_to_use):
+        new_type = [type for type in list(spectra_to_use) if type.startswith(self.spectral_type)]
         new_spectral_type = np.random.choice(new_type)
-        if new_spectral_type in self.spectra:
+        self.spectral_type = new_spectral_type
 
-            data = self.spectra[new_spectral_type]
+        if new_spectral_type in spectra_to_use:
+
+            data = spectra_to_use[new_spectral_type]
             self.wavelengths, self.spectrum = self.read_spectrum_from_fits(data)
 
             self.total_lum = np.trapz(self.spectrum, x=self.wavelengths)
 
             self.flux = self.spectrum / self.total_lum
+            self.wavelength = self.wavelengths[self.wavelengths < 10000]
+            self.spectrum = self.spectrum[self.wavelengths < 10000]
+            self.flux = self.flux[self.wavelengths < 10000]
 
         else:
             raise ValueError(f"Spectral type {new_spectral_type} not available in spectra.")
@@ -86,9 +97,23 @@ class STAR:
                     color='mediumslateblue')
         plt.xlabel('Wavelength (Å)')
         plt.ylabel('Normalized Flux (ergs^-1Å^-1)') # ergs−1A−1
-        plt.title(f'Normalized Spectral Data - Type {self.spectral_type}')
+        plt.title(f'Normalized Spectral Data - Type {self.spectral_type} - branch {self.branch}')
         plt.ticklabel_format(axis='y', style='sci', scilimits=(0, 0))
         plt.show()
+
+    def new_properties(self):
+        assert self.branch == 'RG' or self.branch == 'HB', f"Branch must be 'RG' or 'HB', but got {self.branch}"
+        new_proper = {
+            'G5': (5010 * u.K, 127 * L_sun),
+            'G8': (4870 * u.K, 113 * L_sun),
+            'K0': (4720 * u.K, 96 * L_sun),
+            'K1': (4580 * u.K, 82 * L_sun),
+            'K2': (4460 * u.K, 70 * L_sun),
+            'M2': (3500 * u.K, 11 * L_sun),
+            'M4': (3100 * u.K, 7.4 * L_sun),
+            'M6': (2800 * u.K, 3.3 * L_sun),
+        }
+        self.temperature, self.luminosity = new_proper[star.spectral_type]
 
     def update(self, t):
         # T es edad del universo!
@@ -104,14 +129,26 @@ class STAR:
                 if life - self.t_ms < 1 * u.Gyr:
                     if self.branch == 'MS':
                         self.branch = 'RG'
+                        self.spectral_type = 'K'
+                        self.get_star_spectrum(self.spectra_branch)
+                        self.new_properties()
+
+                    elif self.branch == 'RG':
+                        self.spectral_type = 'M'
+                        self.get_star_spectrum(self.spectra_branch)
+                        self.new_properties()
 
                 elif life - self.t_ms < HB_life:
                     self.branch = 'HB'
-            
+                    self.spectral_type = 'G'
+                    self.get_star_spectrum(self.spectra_branch)
+                    self.new_properties()
+
                 else:
                     self.branch = 'Dead'
                     self.spectrum = np.zeros(self.spectrum.shape)
         else:
             if life > self.t_ms:
                 self.branch = "Dead"
-                self.spectrum = np.zeros(self.spectrum.shape)  
+                self.spectrum = np.zeros(self.spectrum.shape)
+
