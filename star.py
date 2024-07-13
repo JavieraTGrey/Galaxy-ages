@@ -115,6 +115,7 @@ class STAR:
         }
         self.temperature, self.luminosity = new_proper[star.spectral_type]
 
+
     def update(self, t):
         # T es edad del universo!
 
@@ -123,6 +124,7 @@ class STAR:
 
         if life.value < 0:
             self.branch = 'Unborn Star'
+            self.flux = np.zeros(self.spectrum.shape)
 
         elif (self.mass/M_sun) < 5:
             if life > self.t_ms:
@@ -146,9 +148,10 @@ class STAR:
 
                 else:
                     self.branch = 'Dead'
-                    self.spectrum = np.zeros(self.spectrum.shape)
+                    self.spectral_type = 'Dead'
+                    self.flux = np.zeros(self.spectrum.shape)
         else:
             if life > self.t_ms:
                 self.branch = "Dead"
-                self.spectrum = np.zeros(self.spectrum.shape)
-
+                self.spectral_type = 'Dead'
+                self.flux = np.zeros(self.spectrum.shape)
